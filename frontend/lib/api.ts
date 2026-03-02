@@ -2,10 +2,10 @@ const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 /**
- * Upload a PDF file to the backend.
- * Returns the doc_id for subsequent API calls.
+ * Upload a document file (PDF, image, or text) to the backend.
+ * Returns the doc_id and file_type for subsequent API calls.
  */
-export async function uploadPDF(file: File): Promise<{ doc_id: string }> {
+export async function uploadDocument(file: File): Promise<{ doc_id: string; file_type: string }> {
   const formData = new FormData();
   formData.append("file", file);
 
@@ -21,6 +21,11 @@ export async function uploadPDF(file: File): Promise<{ doc_id: string }> {
 
   return response.json();
 }
+
+/**
+ * @deprecated Use uploadDocument instead
+ */
+export const uploadPDF = uploadDocument;
 
 /**
  * Get the document tree (JSON + ASCII representation).
@@ -81,15 +86,31 @@ export async function queryDocument(
 }
 
 /**
- * Get the total page count for a document.
+ * Get the total page count and file type for a document.
  */
 export async function getPageCount(
   docId: string
-): Promise<{ doc_id: string; page_count: number }> {
+): Promise<{ doc_id: string; page_count: number; file_type?: string }> {
   const response = await fetch(`${BACKEND_URL}/page-count/${docId}`);
 
   if (!response.ok) {
     throw new Error("Failed to get page count");
+  }
+
+  return response.json();
+}
+
+/**
+ * Get document metadata (type, name, etc.).
+ */
+export async function getDocumentInfo(
+  docId: string
+): Promise<{ doc_id: string; file_type: string; original_name: string; extension?: string }> {
+  const response = await fetch(`${BACKEND_URL}/document-info/${docId}`);
+
+  if (!response.ok) {
+    // Fallback: assume PDF
+    return { doc_id: docId, file_type: "pdf", original_name: "document.pdf" };
   }
 
   return response.json();

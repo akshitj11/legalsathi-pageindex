@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FileText, ArrowLeft, Loader2 } from "lucide-react";
 import TreeViewer, { TreeNode } from "@/components/TreeViewer";
 import PDFViewer from "@/components/PDFViewer";
@@ -10,6 +10,7 @@ import {
   connectStatusWebSocket,
   getTree,
   getPageCount,
+  getDocumentInfo,
   queryDocument,
   getBackendUrl,
 } from "@/lib/api";
@@ -17,6 +18,7 @@ import {
 export default function AnalyzePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const docId = params.doc_id as string;
 
   // State
@@ -24,6 +26,7 @@ export default function AnalyzePage() {
   const [asciiTree, setAsciiTree] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [fileType, setFileType] = useState<string>(searchParams.get("type") || "pdf");
   const [prefillQuery, setPrefillQuery] = useState("");
   const [isProcessing, setIsProcessing] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -84,8 +87,18 @@ export default function AnalyzePage() {
     try {
       const data = await getPageCount(docId);
       setTotalPages(data.page_count);
+      if (data.file_type) {
+        setFileType(data.file_type);
+      }
     } catch {
-      setTotalPages(15); // Fallback for demo
+      // Try to get file type from document-info endpoint
+      try {
+        const info = await getDocumentInfo(docId);
+        setFileType(info.file_type);
+        setTotalPages(info.file_type === "pdf" ? 15 : 1);
+      } catch {
+        setTotalPages(15); // Fallback for demo
+      }
     }
   }, [docId]);
 
@@ -222,6 +235,7 @@ export default function AnalyzePage() {
               totalPages={totalPages}
               onPageChange={setCurrentPage}
               backendUrl={getBackendUrl()}
+              fileType={fileType}
             />
           </div>
 

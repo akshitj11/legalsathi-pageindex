@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import UploadZone from "@/components/UploadZone";
-import { uploadPDF } from "@/lib/api";
+import { uploadDocument } from "@/lib/api";
 import { FileText, Shield, Mic, Languages } from "lucide-react";
 
 export default function Home() {
@@ -16,8 +16,8 @@ export default function Home() {
     setError(null);
 
     try {
-      const { doc_id } = await uploadPDF(file);
-      router.push(`/analyze/${doc_id}`);
+      const { doc_id, file_type } = await uploadDocument(file);
+      router.push(`/analyze/${doc_id}?type=${file_type}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Upload failed. Try again."
