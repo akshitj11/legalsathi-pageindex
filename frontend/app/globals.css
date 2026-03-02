@@ -1,0 +1,128 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-text-primary font-sans;
+  }
+
+  * {
+    @apply border-primary;
+  }
+}
+
+@layer components {
+  /* Neobrutalism button */
+  .btn-brutal {
+    @apply bg-primary text-background font-bold px-6 py-3
+           border-2 border-primary shadow-brutal
+           transition-all duration-100 ease-in-out
+           hover:translate-x-[2px] hover:translate-y-[2px]
+           hover:shadow-brutal-hover
+           active:translate-x-[4px] active:translate-y-[4px]
+           active:shadow-none;
+  }
+
+  .btn-brutal-outline {
+    @apply bg-background text-primary font-bold px-6 py-3
+           border-2 border-primary shadow-brutal
+           transition-all duration-100 ease-in-out
+           hover:translate-x-[2px] hover:translate-y-[2px]
+           hover:shadow-brutal-hover hover:bg-accent
+           active:translate-x-[4px] active:translate-y-[4px]
+           active:shadow-none;
+  }
+
+  /* Neobrutalism card */
+  .card-brutal {
+    @apply bg-surface border-2 border-primary shadow-brutal p-4;
+  }
+
+  /* Neobrutalism input */
+  .input-brutal {
+    @apply bg-background border-2 border-primary px-4 py-3 w-full
+           font-sans text-text-primary placeholder:text-text-secondary
+           focus:outline-none focus:shadow-brutal-sm
+           transition-shadow duration-100;
+  }
+
+  /* Code block for ASCII tree */
+  .tree-block {
+    @apply bg-primary text-green-400 font-mono text-sm p-4
+           border-2 border-primary overflow-auto;
+  }
+
+  /* Panel styles */
+  .panel {
+    @apply bg-surface border-2 border-primary h-full overflow-auto;
+  }
+
+  .panel-header {
+    @apply bg-primary text-background px-4 py-2 font-bold text-sm uppercase tracking-wider
+           border-b-2 border-primary;
+  }
+}
+
+/* Custom scrollbar for neobrutalism */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F5F0;
+  border-left: 2px solid #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555550;
+}
+
+/* Tree node hover effect */
+.tree-node {
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.tree-node:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Pulsing animation for processing */
+@keyframes pulse-brutal {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-brutal {
+  animation: pulse-brutal 1.5s ease-in-out infinite;
+}
+
+/* Loading dots */
+@keyframes dots {
+  0%, 20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60%, 100% {
+    content: "...";
+  }
+}
+
+.loading-dots::after {
+  content: "";
+  animation: dots 1.5s steps(1, end) infinite;
+}
