@@ -38,7 +38,7 @@ export default function Home() {
             <h1 className="text-2xl font-bold tracking-tight">LegalSaathi</h1>
           </div>
           <span className="text-text-secondary text-sm font-medium">
-            AI Legal Document Analyzer
+            Document Analyzer based on pageindex
           </span>
         </div>
       </header>
