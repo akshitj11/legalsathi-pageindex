@@ -66,6 +66,145 @@ class PageIndexService:
             # PageIndex not installed — return a demo tree for development
             return await self._generate_demo_tree(pdf_path, doc_id, status_store)
 
+    async def index_from_text(
+        self,
+        text: str,
+        doc_id: str,
+        status_store: Dict[str, dict],
+    ) -> dict:
+        """
+        Build a document tree from extracted text (for non-PDF files).
+        Uses Gemini to analyze the text and create a hierarchical structure.
+
+        Args:
+            text: Extracted text content
+            doc_id: Unique document identifier
+            status_store: Shared dict for progress updates
+
+        Returns:
+            Document tree as a dictionary
+        """
+        try:
+            import google.generativeai as genai
+
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel("gemini-1.5-pro")
+
+            status_store[doc_id]["current_node"] = "Analyzing document structure..."
+            status_store[doc_id]["progress"] = 40
+
+            prompt = f"""Analyze this legal document text and create a hierarchical tree structure.
+Return a JSON object with this exact format:
+{{
+  "id": "root",
+  "label": "<Document Type>",
+  "label_hi": "<Document Type in Hindi/Hinglish>",
+  "pages": "1",
+  "children": [
+    {{
+      "id": "0001",
+      "label": "<Section Name>",
+      "label_hi": "<Section Name in Hindi/Hinglish>",
+      "pages": "1",
+      "summary": "<Brief summary of this section>",
+      "children": [...]
+    }}
+  ]
+}}
+
+Rules:
+- Create 3-8 top-level sections based on the document content
+- Each section can have 0-4 children (sub-sections)
+- Use simple, everyday language for labels (especially Hindi labels)
+- IDs should be sequential: 0001, 0002, 0003, etc.
+- All pages should be "1" since this is a single-page document
+- Return ONLY valid JSON, no markdown formatting
+
+Document text:
+{text[:8000]}"""
+
+            response = await asyncio.to_thread(
+                model.generate_content, prompt
+            )
+
+            status_store[doc_id]["progress"] = 70
+            status_store[doc_id]["current_node"] = "Building tree..."
+
+            # Parse the JSON response
+            response_text = response.text.strip()
+            # Remove markdown code block if present
+            if response_text.startswith("```"):
+                lines = response_text.split("\n")
+                response_text = "\n".join(lines[1:])
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
+                response_text = response_text.strip()
+
+            tree_data = json.loads(response_text)
+
+            status_store[doc_id]["progress"] = 90
+            status_store[doc_id]["nodes_built"] = self._count_nodes(tree_data)
+            status_store[doc_id]["tree_ascii"] = tree_to_ascii(tree_data)
+            status_store[doc_id]["current_node"] = "Finalizing..."
+
+            return tree_data
+
+        except Exception:
+            # Fallback to demo tree if Gemini fails
+            return await self._generate_demo_tree_from_text(
+                text, doc_id, status_store
+            )
+
+    async def _generate_demo_tree_from_text(
+        self,
+        text: str,
+        doc_id: str,
+        status_store: Dict[str, dict],
+    ) -> dict:
+        """Generate a demo tree from text content when Gemini is unavailable."""
+        demo_tree = {
+            "id": "root",
+            "label": "Legal Document",
+            "label_hi": "Kanuni Dastavez",
+            "pages": "1",
+            "children": [
+                {
+                    "id": "0001",
+                    "label": "Parties Involved",
+                    "label_hi": "Kaun Kaun Shamil Hai",
+                    "pages": "1",
+                    "summary": text[:200] if text else "Document parties",
+                    "children": [],
+                },
+                {
+                    "id": "0002",
+                    "label": "Terms & Conditions",
+                    "label_hi": "Niyam Aur Shartein",
+                    "pages": "1",
+                    "children": [],
+                },
+                {
+                    "id": "0003",
+                    "label": "Important Clauses",
+                    "label_hi": "Zaruri Baatein",
+                    "pages": "1",
+                    "children": [],
+                },
+            ],
+        }
+
+        # Simulate progressive building
+        total_steps = 5
+        for step in range(total_steps):
+            await asyncio.sleep(0.5)
+            progress = int(40 + (step + 1) / total_steps * 50)
+            status_store[doc_id]["progress"] = progress
+            status_store[doc_id]["nodes_built"] = step + 1
+            status_store[doc_id]["current_node"] = f"Building node {step + 1}..."
+            status_store[doc_id]["tree_ascii"] = tree_to_ascii(demo_tree)
+
+        return demo_tree
+
     async def query_tree(
         self,
         tree: dict,
