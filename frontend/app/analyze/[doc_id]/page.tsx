@@ -121,8 +121,7 @@ export default function AnalyzePage() {
     }
 
     // Pre-fill chat with a question about this section
-    const label = node.label_hi || node.label;
-    setPrefillQuery(`"${label}" ke baare mein batao`);
+    setPrefillQuery("Is section ke baare mein batao");
   };
 
   // Handle query

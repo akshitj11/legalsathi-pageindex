@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Volume2, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import VoiceInput from "./VoiceInput";
 
 interface ChatMessage {
@@ -239,7 +240,9 @@ function MessageBubble({
       )}
 
       <div className="bg-surface border-2 border-primary px-4 py-3 shadow-brutal-sm max-w-[95%]">
-        <p className="text-sm leading-relaxed">{message.text}</p>
+        <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+          <ReactMarkdown>{message.text}</ReactMarkdown>
+        </div>
 
         {message.source && (
           <button
