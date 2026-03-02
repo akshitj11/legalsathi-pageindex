@@ -2,7 +2,7 @@
 Query route - Handles user queries against the document tree.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from typing import Optional, Literal
 
@@ -89,11 +89,13 @@ async def query_document(doc_id: str, request: QueryRequest):
 
 
 @router.post("/voice-to-text")
-async def voice_to_text(audio_data: bytes):
+async def voice_to_text(audio: UploadFile = File(...)):
     """
     Converts voice audio to text using Sarvam AI STT.
+    Accepts multipart/form-data with an 'audio' file field.
     """
     try:
+        audio_data = await audio.read()
         sarvam = SarvamService()
         text = await sarvam.speech_to_text(audio_data)
         return {"text": text}
