@@ -183,11 +183,13 @@ function findNodeForLine(
   // Also try with summary prefix removed
   if (cleaned.startsWith('summary:"')) return null;
 
-  for (const [key, node] of flatNodes) {
-    if (cleaned === key.replace(/\s/g, "")) {
-      return node;
+  let found: TreeNode | null = null;
+  flatNodes.forEach((node, key) => {
+    if (!found && cleaned === key.replace(/\s/g, "")) {
+      found = node;
     }
-  }
+  });
+  return found;
 
   return null;
 }
