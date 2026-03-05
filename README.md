@@ -4,6 +4,8 @@
 
 Upload any document — rent agreement, job contract, loan paper, court notice — and get simple Hindi/English explanations powered by AI. Speak your questions, hear the answers. No legal jargon, no confusion.
 
+LegalSathi uses PageIndex as its core document intelligence engine, replacing traditional vector based RAG with a reasoning first approach that's far better suited for structured legal documents. When a PDF is uploaded, PageIndex analyzes the full document and constructs a hierarchical tree mirroring the natural structure of legal texts like sections, clauses, sub-clauses, and schedules which is then rendered as an interactive ASCII tree in the left panel of the UI. When a user asks a question in Hindi or English, PageIndex doesn't do a fuzzy similarity search across random text chunks; instead, it reasons through the document tree to locate the most relevant node, enabling LegalSathi to return the exact quote from the precise clause and page number rather than a vague approximate match. This makes the system especially powerful for legal documents where context, hierarchy, and precision matter a clause in Section 4.2 means something very different from a similar-sounding phrase in an appendix, and PageIndex respects that distinction naturally.
+
 ---
 
 ## What It Does
